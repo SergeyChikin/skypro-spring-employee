@@ -7,38 +7,45 @@ import pro.sky.skyprospringemployee.Exceptions.EmployeeAlreadyAddException;
 import pro.sky.skyprospringemployee.Exceptions.EmployeeNotFoundException;
 import pro.sky.skyprospringemployee.Exceptions.EmployeeStorageIsFullException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class EmployeeService{
-    List<Employee> employees = new ArrayList<>(List.of(
-                new Employee("Данил", "Багирян"),
-                new Employee("Яна", "Валуйская"),
-                new Employee("Любовь", "Дятлова"),
-                new Employee("Василий", "Гудков"),
-                new Employee("Александр", "Жердев"),
-                new Employee("Юлия", "Коряковцева"),
-                new Employee("Михаил", "Низовский"),
-                new Employee("Егор", "Орехов"),
-                new Employee("Екатерина", "Перещук")
+    Map<String, Employee> employees = new HashMap<>(Map.of(
+                getEmployeeKey("Данил", "Багирян"), new Employee("Данил", "Багирян"),
+                getEmployeeKey("Яна", "Валуйская"), new Employee("Яна", "Валуйская"),
+                getEmployeeKey("Любовь", "Дятлова"), new Employee("Любовь", "Дятлова"),
+                getEmployeeKey("Василий", "Гудков"), new Employee("Василий", "Гудков"),
+                getEmployeeKey("Александр", "Жердев"), new Employee("Александр", "Жердев"),
+                getEmployeeKey("Юлия", "Коряковцева"),  new Employee("Юлия", "Коряковцева"),
+                getEmployeeKey("Михаил", "Низовский"), new Employee("Михаил", "Низовский"),
+                getEmployeeKey("Егор", "Орехов"), new Employee("Егор", "Орехов"),
+                getEmployeeKey("Екатерина", "Перещук"), new Employee("Екатерина", "Перещук")
         )
     );
 
+    public String getEmployeeKey(String firstName, String lastName) {
+        String fullName = (firstName + lastName).replace(" ", "");
+        String key = "";
+        for (int i = 0; i < fullName.length(); i++) {
+            char symbol = fullName.charAt(i);
+            key += String.valueOf((int)symbol);
+        }
+        return key;
+    }
 
-
-    private final int employeesCapacity = 12;
+    private final int employeesCapacity = 14;
     public Employee addEmployee(String firstName, String lastName) {
         if (firstName.replace(" ", "").isEmpty() || lastName.replace(" ", "").isEmpty()) {
             throw new EmployeeNotFoundException("Введите корректно имя и фамилию!!!");
         }
-        for (Employee emp : employees) {
-            if (firstName.equals(emp.getFirstName()) && lastName.equals(emp.getLastName())) {
-                throw new EmployeeAlreadyAddException("Сотрудник в списке уже существует!!!");
-            }
+        String key = getEmployeeKey(firstName, lastName);
+        if(employees.containsKey(key)) {
+            throw new EmployeeAlreadyAddException("Сотрудник в списке уже существует!!!");
         }
+
         Employee employee = new Employee(firstName, lastName);
-        employees.add(employee);
+        employees.put(getEmployeeKey(firstName, lastName),employee);
         if (employees.size() >= employeesCapacity) {
           throw new EmployeeStorageIsFullException("Список сотрудников переполнен!!!");
         }
@@ -48,26 +55,25 @@ public class EmployeeService{
 
 
     public Employee removeEmployee(String firstName, String lastName) {
-        for (Employee emp : employees) {
-            if (firstName.equals(emp.getFirstName()) && lastName.equals(emp.getLastName())) {
-                employees.remove(emp);
-                return emp;
-            }
+        String key = getEmployeeKey(firstName, lastName);
+        if(employees.containsKey(key)){
+            Employee employee = employees.get(key);
+            employees.remove(employee);
+            return employee;
         }
         throw new EmployeeNotFoundException("Сотрудник не найден!!!");
     }
 
     public Employee findEmployee(String firstName, String lastName) {
-        for (Employee emp : employees) {
-            if (firstName.equals(emp.getFirstName()) && lastName.equals(emp.getLastName())) {
-                return emp;
-            }
+        String key = getEmployeeKey(firstName, lastName);
+        if(employees.containsKey(key)) {
+            return employees.get(key);
         }
         throw new EmployeeNotFoundException("Сотрудник не найден!!!");
     }
 
-    public List<Employee> getEmployees() {
-        return employees;
+    public Collection<Employee> getEmployees() {
+        return Collections.unmodifiableCollection(employees.values());
     }
 
 
