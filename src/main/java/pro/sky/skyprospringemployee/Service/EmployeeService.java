@@ -1,5 +1,4 @@
 package pro.sky.skyprospringemployee.Service;
-
 import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.springframework.stereotype.Service;
 import pro.sky.skyprospringemployee.Employee;
@@ -7,8 +6,8 @@ import pro.sky.skyprospringemployee.Exceptions.EmployeeAlreadyAddException;
 import pro.sky.skyprospringemployee.Exceptions.EmployeeNotFoundException;
 import pro.sky.skyprospringemployee.Exceptions.EmployeeStorageIsFullException;
 import java.util.stream.Collectors;
-
 import java.util.*;
+import org.apache.commons.lang3.StringUtils;
 
 import static java.util.Arrays.stream;
 
@@ -39,7 +38,7 @@ public class EmployeeService{
     private final int employeesCapacity = 12;
 
     public String getEmployeeKey(String firstName, String lastName) {
-        String fullName = (firstName + lastName).replace(" ", "");
+        String fullName = StringUtils.replace(firstName + lastName, " ", "");
         String key = "";
         for (int i = 0; i < fullName.length(); i++) {
             char symbol = fullName.charAt(i);
@@ -50,9 +49,14 @@ public class EmployeeService{
 
 
     public Employee addEmployee(String firstName, String lastName, double salary, int department) {
-        if (firstName.replace(" ", "").isEmpty() || lastName.replace(" ", "").isEmpty()) {
-            throw new EmployeeNotFoundException("Введите корректно имя и фамилию!!!");
+
+        if (!StringUtils.isAlpha(firstName) || !StringUtils.isAlpha(lastName)) {
+            throw new EmployeeNotFoundException("Введите корректно имя и фамилию");
         }
+
+        StringUtils.capitalize(firstName);
+        StringUtils.capitalize(lastName);
+
         String key = getEmployeeKey(firstName, lastName);
         if(employees.containsKey(key)) {
             throw new EmployeeAlreadyAddException("Сотрудник в списке уже существует!!!");
@@ -68,6 +72,9 @@ public class EmployeeService{
 
 
     public Employee removeEmployee(String firstName, String lastName) {
+        if (!StringUtils.isAlpha(firstName) || !StringUtils.isAlpha(lastName)) {
+            throw new EmployeeNotFoundException("Введите корректно имя и фамилию");
+        }
         String key = getEmployeeKey(firstName, lastName);
         if(employees.containsKey(key)){
             Employee employee = employees.get(key);
@@ -79,6 +86,11 @@ public class EmployeeService{
 
 
     public Employee findEmployee(String firstName, String lastName) {
+        if (!StringUtils.isAlpha(firstName) || !StringUtils.isAlpha(lastName)) {
+            throw new EmployeeNotFoundException("Введите корректно имя и фамилию");
+        }
+        StringUtils.capitalize(firstName);
+        StringUtils.capitalize(lastName);
         String key = getEmployeeKey(firstName, lastName);
         if(employees.containsKey(key)) {
             return employees.get(key);
