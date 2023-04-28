@@ -8,6 +8,7 @@ import pro.sky.skyprospringemployee.Exceptions.EmployeeStorageIsFullException;
 import java.util.stream.Collectors;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
+import pro.sky.skyprospringemployee.Exceptions.InvalidInputException;
 
 import static java.util.Arrays.stream;
 
@@ -37,7 +38,7 @@ public class EmployeeService{
 
     private final int employeesCapacity = 12;
 
-    public String getEmployeeKey(String firstName, String lastName) {
+    private String getEmployeeKey(String firstName, String lastName) {
         String fullName = StringUtils.replace(firstName + lastName, " ", "");
         String key = "";
         for (int i = 0; i < fullName.length(); i++) {
@@ -50,12 +51,9 @@ public class EmployeeService{
 
     public Employee addEmployee(String firstName, String lastName, double salary, int department) {
 
-        if (!StringUtils.isAlpha(firstName) || !StringUtils.isAlpha(lastName)) {
-            throw new EmployeeNotFoundException("Введите корректно имя и фамилию");
+        if (!validateInput(firstName, lastName)) {
+            throw new InvalidInputException();
         }
-
-        StringUtils.capitalize(firstName);
-        StringUtils.capitalize(lastName);
 
         String key = getEmployeeKey(firstName, lastName);
         if(employees.containsKey(key)) {
@@ -72,8 +70,8 @@ public class EmployeeService{
 
 
     public Employee removeEmployee(String firstName, String lastName) {
-        if (!StringUtils.isAlpha(firstName) || !StringUtils.isAlpha(lastName)) {
-            throw new EmployeeNotFoundException("Введите корректно имя и фамилию");
+        if (!validateInput(firstName, lastName)) {
+            throw new InvalidInputException();
         }
         String key = getEmployeeKey(firstName, lastName);
         if(employees.containsKey(key)){
@@ -86,11 +84,10 @@ public class EmployeeService{
 
 
     public Employee findEmployee(String firstName, String lastName) {
-        if (!StringUtils.isAlpha(firstName) || !StringUtils.isAlpha(lastName)) {
-            throw new EmployeeNotFoundException("Введите корректно имя и фамилию");
+        if (!validateInput(firstName, lastName)) {
+            throw new InvalidInputException();
         }
-        StringUtils.capitalize(firstName);
-        StringUtils.capitalize(lastName);
+
         String key = getEmployeeKey(firstName, lastName);
         if(employees.containsKey(key)) {
             return employees.get(key);
@@ -103,7 +100,9 @@ public class EmployeeService{
         return Collections.unmodifiableCollection(employees.values());
     }
 
-
+    private boolean validateInput(String firstName, String lastName) {
+        return StringUtils.isAlpha(firstName) && StringUtils.isAlpha(lastName);
+    }
 
 }
 

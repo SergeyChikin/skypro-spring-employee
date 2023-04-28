@@ -1,5 +1,11 @@
 package pro.sky.skyprospringemployee;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Objects;
+
+import static org.apache.commons.lang3.StringUtils.capitalize;
+
 public class Employee {
     private String firstName;
     private String lastName;
@@ -8,8 +14,8 @@ public class Employee {
 
 
     public Employee(String firstName, String lastName, double salary, int department){
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.firstName = capitalize(firstName.toLowerCase());
+        this.lastName = capitalize(lastName.toLowerCase());
         this.salary = salary;
         this.department = department;
 
@@ -42,15 +48,17 @@ public class Employee {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (!(obj instanceof Employee)) return false;
         Employee employee = (Employee) obj;
-        return firstName.equals(employee.firstName) && lastName.equals(employee.lastName);
+        return Objects.equals(firstName, employee.firstName) && Objects.equals(lastName, employee.lastName) &&
+                                Double.compare(employee.salary, salary) == 0 &&
+                                department == employee.department ;
 
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(lastName);
+        return java.util.Objects.hash(firstName, lastName, salary, department);
     }
 
 
